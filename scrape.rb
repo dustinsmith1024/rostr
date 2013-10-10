@@ -47,7 +47,7 @@ module MyCapybaraTest
       end
 
       players = []
-	    links.each do |link|
+	    links[102..-1].each_with_index do |link, index|
 	    	puts "Visiting #{link}"
 				visit(link)
 				# Sleep seems necessary or things time out
@@ -61,7 +61,9 @@ module MyCapybaraTest
 				image_src = find('.player-headshot img')[:src]
 
 				# Something with the player
-				players << {
+				puts team_name
+				p = {
+					id: (index + 103).to_s,
 					name: player_name,
 					team: team_id(team_name).to_s,
 					number: number,
@@ -69,6 +71,10 @@ module MyCapybaraTest
 					image_source: image_src,
 					nba_link: link
 				}
+				players << p
+
+				append_data(p, 'players_continuous.rb')
+				append_data(',', 'players_continuous.rb')
 
 				puts "#{player_name} #{team_name} #{number} #{image_src}"
 	    end
@@ -77,6 +83,27 @@ module MyCapybaraTest
 
 	    save_data(players, 'players.rb')
 	    save_data(players.to_json, 'players.json')
+	    # TODO: Probably dpnt need to write multiple times
+	    save_data(teams_with_player(teams, players), 'teams_with_players.rb')
+    end
+
+    def teams_with_player(ts, players)
+    	# TODO: Clean up
+    	ts.each do |t|
+    		ps = []
+    		players.each do |p|
+    			if p[:team] == t[:id]
+    				ps << p[:id]
+    			end
+    		end
+    		t[:players] = ps
+    	end
+    	
+    	ts
+    end
+
+    def append_data(data, filename)
+    	File.open(filename, 'a') { |file| file.write(data) }
     end
 
     def save_data(data, filename)
@@ -88,6 +115,12 @@ module MyCapybaraTest
     end
 
     def team_id(team_name)
+    	if team_name == 'Portland Blazers'
+    		team_name = 'Portland Trail Blazers'
+    	end
+    	if team_name == 'Philadelphia Sixers'
+    		team_name = 'Philadelphia 76ers'
+    	end
     	teams.select {|team| team[:name] == team_name}.first[:id]
     end
 

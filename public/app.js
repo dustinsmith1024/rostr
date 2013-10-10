@@ -2,7 +2,10 @@ window.App = Ember.Application.create();
 
 App.Router.map(function(){
   this.resource('teams', function(){
-    this.resource('team', {path: ':team_id'}); 
+    this.resource('team', {path: ':team_id'}, function(){
+      this.route('guards');
+      this.route('players');
+    }); 
   });
 });
 
@@ -90,11 +93,56 @@ App.TeamRoute = Ember.Route.extend({
 // Controllers
 // Implement explicitly to use the object proxy.
 App.TeamsController = Ember.ArrayController.extend({
-  sortProperties: ['id']
+  sortProperties: ['name']
 });
 
-App.TeamController = Ember.ObjectController.extend({});
+App.TeamController = Ember.ObjectController.extend({
+  filterGuards: false,
+  filterForwards: false,
 
+  actions: {
+    filterGuards: function() {
+      this.set('filterGuards', true);
+      this.set('filterForwards', false);
+    },
+
+    filterForwards: function() {
+      this.set('filterForwards', true);
+      this.set('filterGuards', false);
+    },
+
+    clearFilters: function() {
+      this.set('filterForwards', false);
+      this.set('filterGuards', false);
+    },
+
+    ps: function() {
+      console.log('psss');
+      return this.get("model").get('guards');
+    }
+  }
+
+});
+
+App.TeamPlayersRoute = Ember.Route.extend({
+  model: function(params) {
+    var team = this.modelFor("team");
+    console.log(team.get('players'));
+    return team.get('players');
+  }
+});
+
+App.TeamGuardsRoute = Ember.Route.extend({
+  model: function(params){
+    return this.get('store').find('team', params.team_id).then(
+      function(t){
+        console.log(t);
+      });
+  },
+  renderTemplate: function(controller){
+    this.render('team', {controller: controller});
+  }
+});
 
 /// Fixtures
 App.Store = DS.Store.extend({
@@ -106,7 +154,13 @@ App.Store = DS.Store.extend({
 
 App.Team = DS.Model.extend({
   name: DS.attr('string'),
-  players: DS.hasMany('player')
+  players: DS.hasMany('player'),
+  guards: function() {
+    return this.get('players').filterBy('position', 'Guard');
+  }.property('players'),
+  forwards: function() {
+    return this.get('players').filterBy('position', 'Forward');
+  }.property('players')
 });
 
 /*App.Tab = DS.Model.extend({
@@ -121,6 +175,8 @@ App.Team = DS.Model.extend({
 App.Player = DS.Model.extend({
   number: DS.attr('number'),
   name: DS.attr('string'),
+  image_source: DS.attr('string'),
+  position: DS.attr('string'),
   team: DS.belongsTo('team')
 });
 /*

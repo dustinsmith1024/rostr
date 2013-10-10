@@ -3,6 +3,7 @@
 <head>
 <link href="http://cdnjs.cloudflare.com/ajax/libs/foundation/4.1.6/css/normalize.min.css" rel="stylesheet" type="text/css" />
 <link href="http://cdnjs.cloudflare.com/ajax/libs/foundation/4.1.6/css/foundation.min.css" rel="stylesheet" type="text/css" />
+<link href="app.css" rel="stylesheet" type="text/css">
 <script src="http://cdnjs.cloudflare.com/ajax/libs/foundation/4.1.6/js/vendor/custom.modernizr.min.js"></script>
 <script src="http://cdnjs.cloudflare.com/ajax/libs/foundation/4.1.6/js/vendor/jquery.min.js"></script>
 <script src="http://cdnjs.cloudflare.com/ajax/libs/foundation/4.1.6/js/foundation.min.js"></script>
@@ -14,8 +15,8 @@
 <title>JS Bin</title>
 </head>
 <body>
-      <script type="text/x-handlebars" data-template-name="application">
-      <div class="row">
+    <script type="text/x-handlebars" data-template-name="application">
+      <div class="row outter-row">
         <div class="twelve columns">
           <h1>Rostr</h1>
           <hr>
@@ -26,10 +27,10 @@
   
     <script type="text/x-handlebars" data-template-name="teams">
       <div class="row">
-        <div class="large-4 columns" id="teams">
+        <div class="large-2 columns" id="teams">
           {{ partial "teamsList" }}
         </div>
-        <div class="large-8 columns" id="order">
+        <div class="large-10 columns" id="order">
           {{ outlet }}
         </div>
       </div>
@@ -37,19 +38,46 @@
   
       <script type="text/x-handlebars" data-template-name="_teamsList">
       <h2>Teams</h2>
+      <ul class="team-list sub-nav2">
       {{#each team in controller}}
-        {{#linkTo "team" team class="panel six columns"}} {{ team.name}}{{/linkTo}}
+        <li class="">{{#linkTo "team" team class=""}} {{ team.name}}{{/linkTo}}</li>
       {{/each}}
+      <ul>
     </script>
 
     <script type="text/x-handlebars" data-template-name="team">
       <h3>{{model.id}}: {{model.name}}</h3>
       <h4>Roster:</h4>
-      <ul id="roster">
-      {{#each model.players}}
-        <li>{{number}}. {{name}}</li>
-      {{/each}}
+      <button {{action 'filterGuards'}}>Guards</button>
+      <button {{action 'filterForwards'}}>Forwards</button>
+      <button {{action 'clearFilters'}}>All</button>
+
+      <ul id="roster" class="roster">
+        {{#if filterGuards}}
+          {{#each model.guards}}
+            {{partial "player"}}
+          {{/each}}
+        {{else}}
+          {{#if filterForwards}}
+            {{#each model.forwards}}
+              {{partial "player"}}
+            {{/each}}
+          {{else}}
+            {{#each controller.ps}}
+              {{partial "player"}}
+            {{/each}}
+          {{/if}}
+        {{/if}}
       </ul>
+    </script>
+
+    <script type="text/x-handlebars" data-template-name="player">
+        <li>
+          <span class="player-number">{{number}}</span>
+          <span class="player-image"><img {{bind-attr src=image_source}} /></span>
+          <span class="player-name">{{name}}</span>
+          <span class="player-position">{{position}}</span>
+        </li>
     </script>
 
     <script type="text/x-handlebars" data-template-name="players">

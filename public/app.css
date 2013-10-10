@@ -1,0 +1,38 @@
+body {
+	color: #333;
+}
+
+.row.outter-row {
+	max-width: 100%;
+}
+
+.team-list {
+	list-style-type: none;
+}
+
+.roster li {
+	position: relative;
+	list-style-type: none;
+	max-width: 200px;
+	float: left;
+	margin: 10px;
+}
+
+.player-number {
+	position: absolute;
+	top: 0;
+	left: 0;
+	font-size: 50px;
+}
+
+.player-name {
+	font-size: 25px;
+	display: block;
+	text-align: left;
+	margin-left: 0px;
+	border-top: 3px solid #333;
+}
+
+.team-list li {
+	padding: 10px 0;
+}
