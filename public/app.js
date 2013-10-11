@@ -96,48 +96,82 @@ App.TeamsController = Ember.ArrayController.extend({
   sortProperties: ['name']
 });
 
+App.TeamRoute = Ember.Route.extend({
+  redirect: function() {
+    var model = this.modelFor('team');
+    this.transitionTo('team.players', model);
+  }
+});
+
 App.TeamController = Ember.ObjectController.extend({
+
+});
+
+App.TeamPlayersController = Ember.ArrayController.extend({
+  needs: ['team'],
   filterGuards: false,
-  filterForwards: false,
+  nofilter: "small",
+  guardfilter: "small secondary",
+  forwardfilter: "small secondary",
+  centerfilter: "small secondary",
+  
+  init: function(){
+    console.log('hi');
+    this.resetFilterClasses();
+  },
+
+  resetFilterClasses: function(){
+    var classes = 'small secondary';
+    this.set('guardfilter', classes);
+    this.set('forwardfilter', classes);
+    this.set('centerfilter', classes);
+    this.set('nofilter', 'small');
+  },
+
+  activate: function(one){
+    this.set(one, 'small');
+    this.set('nofilter', 'small secondary');
+  },
+
+  valueObserver: function(){
+    console.log('hi');
+  }.observes('nofilter'),
 
   actions: {
-    filterGuards: function() {
-      this.set('filterGuards', true);
-      this.set('filterForwards', false);
+    filterGuards: function(){
+      this.set('content', this.get('controllers.team').get('guards'));
+      this.resetFilterClasses();
+      this.activate('guardfilter');
     },
-
-    filterForwards: function() {
-      this.set('filterForwards', true);
-      this.set('filterGuards', false);
+    filterCenters: function(){
+      this.set('content', this.get('controllers.team').get('centers'));
+      this.set('nofilter', 'small secondary');
+      this.resetFilterClasses();
+      this.activate('centerfilter');
     },
-
-    clearFilters: function() {
-      this.set('filterForwards', false);
-      this.set('filterGuards', false);
+    filterForwards: function(){
+      this.set('content', this.get('controllers.team').get('forwards'));
+      this.set('nofilter', 'small secondary');
+      this.resetFilterClasses();
+      this.activate('forwardfilter');
     },
-
-    ps: function() {
-      console.log('psss');
-      return this.get("model").get('guards');
+    clearFilters: function(){
+      this.set('content', this.get('controllers.team').get('players'));
+      this.resetFilterClasses();
     }
   }
-
 });
 
 App.TeamPlayersRoute = Ember.Route.extend({
   model: function(params) {
     var team = this.modelFor("team");
-    console.log(team.get('players'));
     return team.get('players');
   }
 });
 
 App.TeamGuardsRoute = Ember.Route.extend({
   model: function(params){
-    return this.get('store').find('team', params.team_id).then(
-      function(t){
-        console.log(t);
-      });
+    return this.get('store').find('team', params.team_id);
   },
   renderTemplate: function(controller){
     this.render('team', {controller: controller});
@@ -155,11 +189,23 @@ App.Store = DS.Store.extend({
 App.Team = DS.Model.extend({
   name: DS.attr('string'),
   players: DS.hasMany('player'),
-  guards: function() {
+  guardsOnly: function() {
     return this.get('players').filterBy('position', 'Guard');
   }.property('players'),
+  guards: function() {
+    return this.get('players').filter(function(p){
+      return (p.get('position').search("Guard") >= 0);
+    });
+  }.property('players'),
   forwards: function() {
-    return this.get('players').filterBy('position', 'Forward');
+    return this.get('players').filter(function(p){
+      return (p.get('position').search("Forward") >= 0);
+    });
+  }.property('players'),
+  centers: function() {
+    return this.get('players').filter(function(p){
+      return (p.get('position').search("Center") >= 0);
+    });
   }.property('players')
 });
 
