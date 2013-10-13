@@ -1,24 +1,24 @@
 <!DOCTYPE html>
 <html>
 <head>
-<link href="http://cdnjs.cloudflare.com/ajax/libs/foundation/4.1.6/css/normalize.min.css" rel="stylesheet" type="text/css" />
-<link href="http://cdnjs.cloudflare.com/ajax/libs/foundation/4.1.6/css/foundation.min.css" rel="stylesheet" type="text/css" />
-<link href="app.css" rel="stylesheet" type="text/css">
-<script src="http://cdnjs.cloudflare.com/ajax/libs/foundation/4.1.6/js/vendor/custom.modernizr.min.js"></script>
-<script src="http://cdnjs.cloudflare.com/ajax/libs/foundation/4.1.6/js/vendor/jquery.min.js"></script>
-<script src="http://cdnjs.cloudflare.com/ajax/libs/foundation/4.1.6/js/foundation.min.js"></script>
-<script src="http://cdnjs.cloudflare.com/ajax/libs/handlebars.js/1.0.0/handlebars.js"></script>
-<script src="http://builds.emberjs.com.s3.amazonaws.com/tags/v1.0.0/ember.js"></script>
+  <link href="http://cdnjs.cloudflare.com/ajax/libs/foundation/4.1.6/css/normalize.min.css" rel="stylesheet" type="text/css" />
+  <link href="http://cdnjs.cloudflare.com/ajax/libs/foundation/4.1.6/css/foundation.min.css" rel="stylesheet" type="text/css" />
+  <link href="app.css" rel="stylesheet" type="text/css">
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/foundation/4.1.6/js/vendor/custom.modernizr.min.js"></script>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/foundation/4.1.6/js/vendor/jquery.min.js"></script>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/foundation/4.1.6/js/foundation.min.js"></script>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/handlebars.js/1.0.0/handlebars.js"></script>
+  <script src="http://builds.emberjs.com.s3.amazonaws.com/tags/v1.0.0/ember.js"></script>
   <script src="http://builds.emberjs.com/tags/v1.0.0-beta.3/ember-data.js"></script>
   <script src="app.js"></script>
-<meta charset=utf-8 />
-<title>JS Bin</title>
+  <meta charset=utf-8 />
+  <title>Rostr</title>
 </head>
 <body>
     <script type="text/x-handlebars" data-template-name="application">
       <div class="row outter-row">
         <div class="twelve columns">
-          <h1>Rostr</h1>
+          <h1>{{#linkTo 'index'}}Rostr{{/linkTo}}</h1>
           <hr>
           <p>{{outlet}}</p>
         </div>
@@ -35,6 +35,10 @@
         </div>
       </div>
     </script>
+
+    <script type="text/x-handlebars" data-template-name="teams/index">
+      <h2>Select a team</h2>
+    </script>
   
     <script type="text/x-handlebars" data-template-name="_teamsList">
       <h2>Teams</h2>
@@ -46,22 +50,20 @@
     </script>
 
     <script type="text/x-handlebars" data-template-name="team">
-      <h3>{{model.id}}: {{model.name}}</h3>
-      <h4>Roster:</h4>
+      <h2>{{model.name}}</h2>
+      <a target="_blank" {{bindAttr href="model.nba_link"}}>View on NBA.com</a>
+      
+      <h4>Roster</h4>
 
-      {{outlet}}
-    </script>
-
-    <script type="text/x-handlebars" data-template-name="team/players">
       <ul class="button-group">
-        <li><button {{bind-attr class="guardfilter"}} {{action 'filterGuards'}}>Guards</button></li>
-        <li><button {{bind-attr class="forwardfilter"}} {{action 'filterForwards'}}>Forwards</button></li>
-        <li><button {{bind-attr class="centerfilter"}} {{action 'filterCenters'}}>Centers</button></li>
-        <li><button {{bind-attr class="nofilter"}} {{action 'clearFilters'}}>All</button></li>
+        <li><button {{bind-attr class=":small filter:secondary"}} {{action 'filter' false}}>All Positions</button></li>
+        <li><button {{bind-attr class=":small :secondary guardsFiltered:active"}} {{action 'filter' 'guards'}}>Guards</button></li>
+        <li><button {{bind-attr class=":small :secondary forwardsFiltered:active"}} {{action 'filter' 'forwards'}}>Forwards</button></li>
+        <li><button {{bind-attr class=":small :secondary centersFiltered:active"}} {{action 'filter' 'centers'}}>Centers</button></li>
       </ul>
-
-      <ul id="roster" class="roster">
-      {{#each model}}
+      
+      <ul id="roster" class="roster row">
+      {{#each controller.roster}}
         <li>
           <span class="player-number">{{number}}</span>
           <span class="player-image"><img {{bind-attr src=image_source}} /></span>
@@ -70,36 +72,14 @@
         </li>
       {{/each}}
       </ul>
+      
+      <div class="row">
+        <div class="large-12">
+        <a target="_blank" {{bindAttr href="model.nba_link"}}>View on NBA.com</a>
+        </div>
+      </div>
+      {{outlet}}
     </script>
 
-    <script type="text/x-handlebars" data-template-name="nothing">
-        {{#if filterGuards}}
-          {{#each model.guards}}
-            {{partial "player"}}
-          {{/each}}
-        {{else}}
-          {{#if filterForwards}}
-            {{#each model.forwards}}
-              {{partial "player"}}
-            {{/each}}
-          {{else}}
-            {{#each controller.ps}}
-              {{partial "player"}}
-            {{/each}}
-          {{/if}}
-        {{/if}}
-    </script>
-
-    <script type="text/x-handlebars" data-template-name="playersOLD">
-    <h4>Roster:</h4>
-    {{model}}
-      <ul id="menu">
-        {{#each p in model}}
-        <li>
-            <p>{{ p.name }}</p>
-        </li>
-        {{/each}}
-      </ul>
-    </script>
 </body>
 </html>

@@ -5,6 +5,9 @@ App.Router.map(function(){
     this.resource('team', {path: ':team_id'}, function(){
       this.route('guards');
       this.route('players');
+      
+      this.route('forwards');
+      this.route('centers');
     }); 
   });
 });
@@ -64,28 +67,8 @@ App.TeamsRoute = Ember.Route.extend({
 });
 
 App.TeamRoute = Ember.Route.extend({
-  /*setupController: function(controller, model) {
-    console.log('team controller');
-    if (model && model.id) {
-      //var roster = App.Player.FIXTURES.filterBy('team', model.id);
-      //var store = this.get('store');
-      //var roster = store.find('player', model.id);
-      var roster = model.get('players');
-      //debugger;
-      this.controllerFor('players').set('model', roster);
-      controller.set('model', model);
-    }
-  },*/
   model: function(params){
-    //console.log('team model');
-    //var stuff = App.Team.FIXTURES.filterBy('id', params.team_id)[0];
-    //return stuff;
     var store = this.get('store');
-    /*var promises = [
-      store.find('team', params.team_id),
-      store.find('player')
-    ];
-    return Ember.RSVP.all(promises);*/
     return store.find('team', params.team_id);
   }
 });
@@ -97,14 +80,87 @@ App.TeamsController = Ember.ArrayController.extend({
 });
 
 App.TeamRoute = Ember.Route.extend({
-  redirect: function() {
+  /*redirect: function() {
     var model = this.modelFor('team');
-    this.transitionTo('team.players', model);
-  }
+    console.log('redir')
+    return this.transitionTo('team.players', model);
+  }*/
 });
 
 App.TeamController = Ember.ObjectController.extend({
+  filterGuards: false,
+  filterForwards: false,
+  filterCenters: false,
+  filter: false,
 
+  guardsFiltered: function(){
+    if(this.filter === "guards"){
+      return true;
+    }
+    console.log('gg');
+    return false;
+  }.property('filter'),
+
+  forwardsFiltered: function(){
+    if(this.filter === "forwards"){
+      return true;
+    }
+    return false;
+  }.property('filter'),
+
+  centersFiltered: function(){
+    if(this.filter === "centers"){
+      return true;
+    }
+    return false;
+  }.property('filter'),
+
+  roster: function(){
+    //debugger;
+    if(this.filter === "guards"){
+      return this.get('model.guards');
+    }else if(this.filter === "centers"){
+      return this.get('model.centers');
+    }else if(this.filter === "forwards"){
+      return this.get('model.forwards');
+    }else{
+      return this.get('model.players');
+    }
+  }.property('filter', 'team'),
+
+  actions: {
+    filter: function(param){
+      console.log(param);
+      this.set('filter', param);
+    },
+    filterGuards: function(){
+      //this.set('content', this.get('controllers.team').get('guards'));
+      //this.resetFilterClasses();
+      //this.activate('guardfilter');
+      this.set('filterGuards', true);
+    },
+    filterCenters: function(){
+      //this.set('content', this.get('controllers.team').get('centers'));
+      //this.set('nofilter', 'small secondary');
+      //this.resetFilterClasses();
+      //this.activate('centerfilter');
+      this.set('filterCenters', true);
+    },
+    filterForwards: function(){
+      //this.set('content', this.get('controllers.team').get('forwards'));
+      //this.set('nofilter', 'small secondary');
+      //this.resetFilterClasses();
+      //this.activate('forwardfilter');
+      this.set('filterForwards', true);
+    },
+    clearFilters: function(){
+      //this.set('content', this.get('controllers.team').get('players'));
+      //this.resetFilterClasses();
+      this.set('filterForwards', false);
+      this.set('filterGuards', false);
+      this.set('filterCenters', false);
+    }
+  }
 });
 
 App.TeamPlayersController = Ember.ArrayController.extend({
@@ -162,61 +218,40 @@ App.TeamPlayersController = Ember.ArrayController.extend({
   }
 });
 
-App.TeamPlayersRoute = Ember.Route.extend({
-  model: function(params) {
-    var team = this.modelFor("team");
-    return team.get('players');
-  }
-});
-
-App.TeamGuardsRoute = Ember.Route.extend({
-  model: function(params){
-    return this.get('store').find('team', params.team_id);
-  },
-  renderTemplate: function(controller){
-    this.render('team', {controller: controller});
-  }
-});
-
-/// Fixtures
 App.Store = DS.Store.extend({
   //revision: 13,
   //adapter: DS.FixtureAdapter.create()
   adapter: 'DS.RESTAdapter'
 });
 
-
 App.Team = DS.Model.extend({
   name: DS.attr('string'),
+  nba_link: DS.attr('string'),
   players: DS.hasMany('player'),
+
+  //Dont need this right now but left for an example of filterBy
   guardsOnly: function() {
     return this.get('players').filterBy('position', 'Guard');
   }.property('players'),
+
   guards: function() {
     return this.get('players').filter(function(p){
       return (p.get('position').search("Guard") >= 0);
     });
   }.property('players'),
+
   forwards: function() {
     return this.get('players').filter(function(p){
       return (p.get('position').search("Forward") >= 0);
     });
   }.property('players'),
+
   centers: function() {
     return this.get('players').filter(function(p){
       return (p.get('position').search("Center") >= 0);
     });
   }.property('players')
 });
-
-/*App.Tab = DS.Model.extend({
-  tabItems: DS.hasMany('App.TabItem'),
-  cents: function() {
-    return this.get('tabItems').getEach('cents').reduce(function(accum, item) {
-      return accum + item;
-    }, 0);
-  }.property('tabItems.@each.cents')
-});*/
 
 App.Player = DS.Model.extend({
   number: DS.attr('number'),
@@ -225,72 +260,3 @@ App.Player = DS.Model.extend({
   position: DS.attr('string'),
   team: DS.belongsTo('team')
 });
-/*
-App.Post = DS.Model.extend({
-  comments: DS.hasMany('comment')
-});
-
-App.Comment = DS.Model.extend({
-  post: DS.belongsTo('post')
-});*/
-/*App.Food = DS.Model.extend({
-  name: DS.attr('string'),
-  imageUrl: DS.attr('string'),
-  cents: DS.attr('number')
-});*/
-
-/*
-App.Team.FIXTURES = [{
-  id: '1',
-  name: "Thunder",
-  playas: [
-  {name:1},{name:2},{name:4}
-  ]
-}, {
-  id: '2',
-    name: "Fire"
-}, {
-  id: '3',
-  name: "Ice"
-}, {
-  id: '4',
-  name: "Quick"
-}, {
-  id: '5',
-  name: "Lakers"
-}, {
-  id: '6',
-  name: "Wolves"
-}];
-
-App.Player.FIXTURES = [{
-  id: '400',
-  number: 15,
-  name: 'MJ',
-  team: '1'
-}, {
-  id: '401',
-  number: 15,
-  name: 'MJ2',
-  team: '1'
-}, {
-  id: '402',
-  number: 15,
-  name: 'Kobe',
-  team: '1'
-}, 
-{
-  id: '403',
-  number: 15,
-  name: 'Lebron',
-  team: '2'
-},
- {
-  id: '404',
-  number: 15,
-  name: 'Durant',
-  team: '3'
-}];
-*/
-
-

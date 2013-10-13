@@ -13,11 +13,17 @@ body {
 .roster li {
 	position: relative;
 	list-style-type: none;
+	width: 200px;
 	max-width: 200px;
+	min-height: 250px;
 	float: left;
 	margin: 10px;
 }
 
+.roster img {
+	width: 200px;
+	height: 161px;
+}
 .player-number {
 	position: absolute;
 	top: 0;
@@ -35,4 +41,16 @@ body {
 
 .team-list li {
 	padding: 10px 0;
+}
+
+/* button active state stole from foundation */
+button.active {
+	background-color: #2ba6cb;
+	border-color: #2284a1;
+	color: #fff;
+}
+
+button.active:hover {
+	background-color: #2284a1;
+	color: #fff;
 }
