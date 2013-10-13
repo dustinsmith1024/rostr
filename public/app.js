@@ -10,22 +10,19 @@ App.Router.map(function(){
       this.route('centers');
     }); 
   });
+  this.resource('players', function(){
+    this.resource('player', {path: ':player_id'}, function(){
+      this.route('details');
+    });
+  });
 });
 
 /*App.ApplicationRoute = Ember.Route.extend({
-  model: function(){
-    return 
-    var store = this.get('store'); 
-
-    store.push('team', {
-      id: 1,
-      name: "Fewer Moving Parts"
-    });
-
-    store.push('team', {
-      id: 2,
-      name: "Calgary b/w I Can't Make You Love Me/Nick Of Time"
-    });
+  init: function(){
+    var store = this.get('store');
+    //Loading the teams here preloads them all and won't need the extra hit for the team
+    var teams = store.find('team');
+    var players = store.find('player');
   }
 });*/
 
@@ -36,25 +33,26 @@ App.Router.map(function(){
   }
 });*/
 
-App.PlayersController = Ember.ArrayController.extend({
-  
-  /*addFood: function(food) {
-    var table = this.controllerFor('table').get('model'),
-        tabItems = table.get('tab.tabItems');
-
-    tabItems.createRecord({
-      food: food,
-      cents: food.get('cents')
-    });
-  }*/
-
-});
-
-App.IndexRoute = Ember.Route.extend({
-  redirect: function() {
-    this.transitionTo('teams');
+App.PlayersRoute = Ember.Route.extend({
+  model: function() {
+    var store = this.get('store');
+    //These are already preloaded, but kept them here for now.
+    var teams = store.find('team');
+    var players = store.find('player');
+    return players;
   }
 });
+
+App.PlayersController = Ember.ArrayController.extend({
+  sortProperties: ['name']
+});
+
+/*
+App.IndexRoute = Ember.Route.extend({
+  redirect: function() {
+    this.transitionTo('players');
+  }
+});*/
 
 
 App.TeamsRoute = Ember.Route.extend({
@@ -62,6 +60,7 @@ App.TeamsRoute = Ember.Route.extend({
     //return App.Team.FIXTURES;
     var store = this.get('store');
     var teams = store.find('team');
+    //var players = store.find('player');
     return teams;
   }
 });
@@ -70,6 +69,9 @@ App.TeamRoute = Ember.Route.extend({
   model: function(params){
     var store = this.get('store');
     return store.find('team', params.team_id);
+  },
+  renderTemplate: function(){
+    this.render({outlet: 'main'});
   }
 });
 
@@ -85,6 +87,9 @@ App.TeamRoute = Ember.Route.extend({
     console.log('redir')
     return this.transitionTo('team.players', model);
   }*/
+  renderTemplate: function(){
+    this.render({outlet: 'detail'});
+  }
 });
 
 App.TeamController = Ember.ObjectController.extend({
@@ -97,7 +102,6 @@ App.TeamController = Ember.ObjectController.extend({
     if(this.filter === "guards"){
       return true;
     }
-    console.log('gg');
     return false;
   }.property('filter'),
 
@@ -259,4 +263,11 @@ App.Player = DS.Model.extend({
   image_source: DS.attr('string'),
   position: DS.attr('string'),
   team: DS.belongsTo('team')
+});
+
+Ember.View.reopen({
+    disconnectOutlet: function(outletName) {
+        if (this.isDestroyed) return;
+        this._super(outletName);
+    }
 });
