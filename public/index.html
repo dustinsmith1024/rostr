@@ -26,10 +26,9 @@
             <p>{{#linkTo "players"}}Players{{/linkTo}}</p>
           </div>
         </div>
-
-        <p>{{outlet main}}</p>
       </div>
-      
+
+      {{outlet}}
     </script>
   
     <script type="text/x-handlebars" data-template-name="index2">
@@ -37,12 +36,14 @@
     </script>
 
     <script type="text/x-handlebars" data-template-name="teams">
-      <div class="row">
-        <div class="large-2 columns" id="teams">
-          {{ partial "teamsList" }}
-        </div>
-        <div class="large-10 columns" id="order">
-          {{outlet detail}}
+      <div class="row outter-row">
+        <div class="row">
+          <div class="large-2 columns" id="teams">
+            {{ partial "teamsList" }}
+          </div>
+          <div class="large-10 columns" id="order">
+            {{outlet}}
+          </div>
         </div>
       </div>
     </script>
@@ -96,12 +97,14 @@
     </script>
 
     <script type="text/x-handlebars" data-template-name="players">
-      <div class="row">
-        <div class="large-2 columns" id="teams">
-          {{ partial "playersList" }}
-        </div>
-        <div class="large-10 columns" id="order">
-          {{ outlet detail }}
+      <div class="row outter-row">
+        <div class="row">
+          <div class="large-2 columns" id="teams">
+            {{ partial "playersList" }}
+          </div>
+          <div class="large-10 columns" id="order">
+            {{ outlet }}
+          </div>
         </div>
       </div>
     </script>
@@ -116,15 +119,19 @@
           <span class="player-image"><img {{bind-attr src=image_source}} /></span>
           <span class="player-name">{{name}}</span>
           <span class="player-position">{{position}}</span>
-          </li>
-          </ul>
+        </li>
+      </ul>
     </script>
 
     <script type="text/x-handlebars" data-template-name="_playersList">
       <h2>Players</h2>
+      <label>Search:
+      {{input on="keyPress" value=search name="search"}}
+      </label>
+
       <ul class="team-list sub-nav2">
-      {{#each player in controller}}
-        <li class="">{{#linkTo "player" player}} {{ player.name}}{{/linkTo}}</li>
+      {{#each player in controller.players}}
+        <li class="">{{#linkTo "player" player}}{{ player.name}} {{player.number}}{{/linkTo}}</li>
       {{/each}}
       </ul>
     </script>

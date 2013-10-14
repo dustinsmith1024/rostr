@@ -3,11 +3,7 @@ window.App = Ember.Application.create();
 App.Router.map(function(){
   this.resource('teams', function(){
     this.resource('team', {path: ':team_id'}, function(){
-      this.route('guards');
-      this.route('players');
       
-      this.route('forwards');
-      this.route('centers');
     }); 
   });
   this.resource('players', function(){
@@ -33,6 +29,12 @@ App.Router.map(function(){
   }
 });*/
 
+/*App.IndexRoute = Ember.Route.extend({
+  redirect: function() {
+    this.transitionTo('players');
+  }
+});*/
+
 App.PlayersRoute = Ember.Route.extend({
   model: function() {
     var store = this.get('store');
@@ -44,16 +46,21 @@ App.PlayersRoute = Ember.Route.extend({
 });
 
 App.PlayersController = Ember.ArrayController.extend({
-  sortProperties: ['name']
+  sortProperties: ['name'],
+  search: false,
+
+  players: function(){
+    var searchTerm = this.get('search');
+    if (searchTerm) {
+      return this.get('model').filter(function(p){
+        return (p.get('name').search(searchTerm) >= 0);
+      });
+    } else {
+      return this.get('model');
+    }
+  }.property('search')
+
 });
-
-/*
-App.IndexRoute = Ember.Route.extend({
-  redirect: function() {
-    this.transitionTo('players');
-  }
-});*/
-
 
 App.TeamsRoute = Ember.Route.extend({
   model: function() {
@@ -69,9 +76,6 @@ App.TeamRoute = Ember.Route.extend({
   model: function(params){
     var store = this.get('store');
     return store.find('team', params.team_id);
-  },
-  renderTemplate: function(){
-    this.render({outlet: 'main'});
   }
 });
 
@@ -84,12 +88,8 @@ App.TeamsController = Ember.ArrayController.extend({
 App.TeamRoute = Ember.Route.extend({
   /*redirect: function() {
     var model = this.modelFor('team');
-    console.log('redir')
     return this.transitionTo('team.players', model);
   }*/
-  renderTemplate: function(){
-    this.render({outlet: 'detail'});
-  }
 });
 
 App.TeamController = Ember.ObjectController.extend({
@@ -102,25 +102,21 @@ App.TeamController = Ember.ObjectController.extend({
     if(this.filter === "guards"){
       return true;
     }
-    return false;
   }.property('filter'),
 
   forwardsFiltered: function(){
     if(this.filter === "forwards"){
       return true;
     }
-    return false;
   }.property('filter'),
 
   centersFiltered: function(){
     if(this.filter === "centers"){
       return true;
     }
-    return false;
   }.property('filter'),
 
   roster: function(){
-    //debugger;
     if(this.filter === "guards"){
       return this.get('model.guards');
     }else if(this.filter === "centers"){
@@ -133,91 +129,8 @@ App.TeamController = Ember.ObjectController.extend({
   }.property('filter', 'team'),
 
   actions: {
-    filter: function(param){
-      console.log(param);
+    filter: function(param) {
       this.set('filter', param);
-    },
-    filterGuards: function(){
-      //this.set('content', this.get('controllers.team').get('guards'));
-      //this.resetFilterClasses();
-      //this.activate('guardfilter');
-      this.set('filterGuards', true);
-    },
-    filterCenters: function(){
-      //this.set('content', this.get('controllers.team').get('centers'));
-      //this.set('nofilter', 'small secondary');
-      //this.resetFilterClasses();
-      //this.activate('centerfilter');
-      this.set('filterCenters', true);
-    },
-    filterForwards: function(){
-      //this.set('content', this.get('controllers.team').get('forwards'));
-      //this.set('nofilter', 'small secondary');
-      //this.resetFilterClasses();
-      //this.activate('forwardfilter');
-      this.set('filterForwards', true);
-    },
-    clearFilters: function(){
-      //this.set('content', this.get('controllers.team').get('players'));
-      //this.resetFilterClasses();
-      this.set('filterForwards', false);
-      this.set('filterGuards', false);
-      this.set('filterCenters', false);
-    }
-  }
-});
-
-App.TeamPlayersController = Ember.ArrayController.extend({
-  needs: ['team'],
-  filterGuards: false,
-  nofilter: "small",
-  guardfilter: "small secondary",
-  forwardfilter: "small secondary",
-  centerfilter: "small secondary",
-  
-  init: function(){
-    console.log('hi');
-    this.resetFilterClasses();
-  },
-
-  resetFilterClasses: function(){
-    var classes = 'small secondary';
-    this.set('guardfilter', classes);
-    this.set('forwardfilter', classes);
-    this.set('centerfilter', classes);
-    this.set('nofilter', 'small');
-  },
-
-  activate: function(one){
-    this.set(one, 'small');
-    this.set('nofilter', 'small secondary');
-  },
-
-  valueObserver: function(){
-    console.log('hi');
-  }.observes('nofilter'),
-
-  actions: {
-    filterGuards: function(){
-      this.set('content', this.get('controllers.team').get('guards'));
-      this.resetFilterClasses();
-      this.activate('guardfilter');
-    },
-    filterCenters: function(){
-      this.set('content', this.get('controllers.team').get('centers'));
-      this.set('nofilter', 'small secondary');
-      this.resetFilterClasses();
-      this.activate('centerfilter');
-    },
-    filterForwards: function(){
-      this.set('content', this.get('controllers.team').get('forwards'));
-      this.set('nofilter', 'small secondary');
-      this.resetFilterClasses();
-      this.activate('forwardfilter');
-    },
-    clearFilters: function(){
-      this.set('content', this.get('controllers.team').get('players'));
-      this.resetFilterClasses();
     }
   }
 });
