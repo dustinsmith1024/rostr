@@ -11,6 +11,7 @@ App.Router.map(function(){
       this.route('details');
     });
   });
+  this.resource('explorer');
 });
 
 /*App.ApplicationRoute = Ember.Route.extend({
@@ -34,6 +35,32 @@ App.Router.map(function(){
     this.transitionTo('players');
   }
 });*/
+App.ExplorerRoute = Ember.Route.extend({
+  model: function() {
+    var store = this.get('store');
+    //These are already preloaded, but kept them here for now.
+    var teams = store.find('team');
+    var players = store.find('player');
+    return players;
+  }
+});
+
+App.ExplorerController = Ember.ArrayController.extend({
+  sortProperties: ['name'],
+  search: false,
+
+  players: function(){
+    var searchTerm = this.get('search');
+    if (searchTerm) {
+      return this.get('model').filter(function(p){
+        return (p.get('name').search(searchTerm) >= 0);
+      });
+    } else {
+      return this.get('model');
+    }
+  }.property('search')
+
+});
 
 App.PlayersRoute = Ember.Route.extend({
   model: function() {
@@ -171,7 +198,7 @@ App.Team = DS.Model.extend({
 });
 
 App.Player = DS.Model.extend({
-  number: DS.attr('number'),
+  number: DS.attr('string'),
   name: DS.attr('string'),
   image_source: DS.attr('string'),
   position: DS.attr('string'),

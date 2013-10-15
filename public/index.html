@@ -24,6 +24,7 @@
           <div class="large-10 columns">
             <p>{{#linkTo "teams"}}Teams{{/linkTo}} </p>
             <p>{{#linkTo "players"}}Players{{/linkTo}}</p>
+            <p>{{#linkTo "explorer"}}Players Explorer{{/linkTo}}</p>
           </div>
         </div>
       </div>
@@ -96,6 +97,16 @@
       </div>
     </script>
 
+    <script type="text/x-handlebars" data-template-name="explorer">
+      <div class="row outter-row">
+        <div class="row">
+          <div class="large-12 columns" id="teams">
+            {{ partial "explorerList" }}
+          </div>
+        </div>
+      </div>
+    </script>
+
     <script type="text/x-handlebars" data-template-name="players">
       <div class="row outter-row">
         <div class="row">
@@ -120,6 +131,29 @@
           <span class="player-name">{{name}}</span>
           <span class="player-position">{{position}}</span>
         </li>
+      </ul>
+    </script>
+
+    <script type="text/x-handlebars" data-template-name="_explorerList">
+      <h2>Players</h2>
+      <div class="row">
+        <div class="large-12 columns">
+          <label>Search:
+            {{input on="keyPress" value=search name="search"}}
+          </label>
+        </div>
+      </div>
+
+      <ul class="roster">
+      {{#each controller.players}}
+        <li class="roster">
+          <span class="player-number">{{number}}</span>
+          <span class="player-image"><img {{bind-attr src=image_source}} /></span>
+          <span class="player-name">{{name}}</span>
+          <div>{{#linkTo "team" team}}{{team.name}}{{/linkTo}}</div>
+          <span class="player-position">{{position}}</span>
+        </li>
+      {{/each}}
       </ul>
     </script>
 
